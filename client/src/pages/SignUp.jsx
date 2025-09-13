@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { Card } from '@/components/ui/card'
 import { RouteSignIn } from '@/helpers/RouteName'
 import { Link, useNavigate } from 'react-router-dom'
-import { getEvn } from '@/helpers/getEnv'
+import { getEnv } from '@/helpers/getEnv'
 import { showToast } from '@/helpers/showToast'
 import GoogleLogin from '@/components/GoogleLogin'
 
@@ -35,7 +35,7 @@ const SignUp = () => {
 
     async function onSubmit(values) {
         try {
-            const response = await fetch(`${getEvn('VITE_API_BASE_URL')}/auth/register`, {
+            const response = await fetch(`${getEnv('VITE_API_BASE_URL')}/auth/register`, {
                 method: 'post',
                 headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify(values)

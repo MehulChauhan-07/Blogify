@@ -123,8 +123,10 @@ export const GoogleLogin = async (req, res, next) => {
 
 export const Logout = async (req, res, next) => {
   try {
-    console.log("Logout attempt: Clearing cookie");
+    const token = req.cookies.access_token;
+    console.log("Logout attempt:", token ? "Token found" : "No token found");
 
+    // Always clear the cookie, even if no token exists
     res.clearCookie("access_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -140,6 +142,33 @@ export const Logout = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Logout error:", error);
-    next(handleError(500, "Logout failed. Please try again."));
+    // Even if there's an error, we want to respond with success for logout
+    // to ensure the frontend can complete the logout process
+    res.status(200).json({
+      success: true,
+      message: "Logout completed.",
+    });
+  }
+};
+
+export const verifyAuth = async (req, res, next) => {
+  try {
+    // The authenticate middleware already verified the token and set req.user
+    const user = req.user;
+
+    // Get fresh user data from database
+    const freshUser = await User.findById(user._id).select("-password");
+
+    if (!freshUser) {
+      return next(handleError(404, "User not found"));
+    }
+
+    res.status(200).json({
+      success: true,
+      user: freshUser,
+      message: "Authentication verified.",
+    });
+  } catch (error) {
+    next(handleError(500, error.message));
   }
 };
