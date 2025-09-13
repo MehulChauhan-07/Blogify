@@ -35,12 +35,13 @@ export const Login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return next(handleError(404, "Invalid login credentials."));
+      next(handleError(404, "Invalid login credentials."));
     }
+    const hashedPassword = user.password;
 
-    const isPasswordValid = await bcryptjs.compare(password, user.password);
-    if (!isPasswordValid) {
-      return next(handleError(404, "Invalid login credentials."));
+    const comparePassword = bcryptjs.compare(password, hashedPassword);
+    if (!comparePassword) {
+      next(handleError(404, "Invalid login credentials."));
     }
 
     const token = jwt.sign(
