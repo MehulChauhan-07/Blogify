@@ -26,6 +26,15 @@ const rootReducer = (state, action) => {
     // Return initial state
     return appReducer(undefined, action);
   }
+
+  // Debug current state in development
+  if (
+    process.env.NODE_ENV === "development" &&
+    action.type === "user/setUser"
+  ) {
+    console.log("Setting user state:", action.payload);
+  }
+
   return appReducer(state, action);
 };
 
