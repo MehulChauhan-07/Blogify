@@ -54,12 +54,17 @@ export const Login = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    res.cookie("access_token", token, {
+    // Cookie configuration for both local and production
+    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: isProduction, // HTTPS required in production
+      sameSite: isProduction ? "none" : "lax", // "none" for cross-origin, "lax" for same-origin
       path: "/",
-    });
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    };
+    
+    res.cookie("access_token", token, cookieOptions);
 
     const newUser = user.toObject({ getters: true });
     delete newUser.password;
@@ -102,12 +107,17 @@ export const GoogleLogin = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    res.cookie("access_token", token, {
+    // Cookie configuration for both local and production
+    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: isProduction, // HTTPS required in production
+      sameSite: isProduction ? "none" : "lax", // "none" for cross-origin, "lax" for same-origin
       path: "/",
-    });
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    };
+    
+    res.cookie("access_token", token, cookieOptions);
 
     const newUser = user.toObject({ getters: true });
     delete newUser.password;
@@ -127,12 +137,16 @@ export const Logout = async (req, res, next) => {
     console.log("Logout attempt:", token ? "Token found" : "No token found");
 
     // Always clear the cookie, even if no token exists
-    res.clearCookie("access_token", {
+    // Cookie configuration for both local and production
+    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: isProduction, // HTTPS required in production
+      sameSite: isProduction ? "none" : "lax", // "none" for cross-origin, "lax" for same-origin
       path: "/",
-    });
+    };
+    
+    res.clearCookie("access_token", cookieOptions);
 
     console.log("Cookie cleared successfully");
 
