@@ -35,13 +35,13 @@ export const Login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      next(handleError(404, "Invalid login credentials."));
+      return next(handleError(401, "Invalid login credentials."));
     }
-    const hashedPassword = user.password;
 
-    const comparePassword = bcryptjs.compare(password, hashedPassword);
-    if (!comparePassword) {
-      next(handleError(404, "Invalid login credentials."));
+    // Use await with bcryptjs.compare as it returns a Promise
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+    if (!isPasswordValid) {
+      return next(handleError(401, "Invalid login credentials."));
     }
 
     const token = jwt.sign(
@@ -123,6 +123,8 @@ export const GoogleLogin = async (req, res, next) => {
 
 export const Logout = async (req, res, next) => {
   try {
+    console.log("Logout attempt: Clearing cookie");
+
     res.clearCookie("access_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -130,11 +132,14 @@ export const Logout = async (req, res, next) => {
       path: "/",
     });
 
+    console.log("Cookie cleared successfully");
+
     res.status(200).json({
       success: true,
       message: "Logout successful.",
     });
   } catch (error) {
-    next(handleError(500, error.message));
+    console.error("Logout error:", error);
+    next(handleError(500, "Logout failed. Please try again."));
   }
 };

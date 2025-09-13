@@ -76,12 +76,21 @@ app.listen(PORT, () => {
   console.log("Server running on port:", PORT);
 });
 
+// Global error handler middleware
 app.use((err, req, res, next) => {
+  console.error(`Error: ${err.message}`, {
+    statusCode: err.statusCode,
+    path: req.path,
+    method: req.method,
+  });
+
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal server error.";
+
   res.status(statusCode).json({
     success: false,
     statusCode,
     message,
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 });
