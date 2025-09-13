@@ -14,7 +14,12 @@ import BlogLikeRoute from "./routes/Bloglike.route.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT;
+// Set NODE_ENV to production if running on Vercel
+if (process.env.VERCEL) {
+  process.env.NODE_ENV = 'production';
+}
+
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cookieParser());
@@ -90,9 +95,15 @@ mongoose
     process.exit(1); // Exit if database connection fails
   });
 
-app.listen(PORT, () => {
-  console.log("Server running on port:", PORT);
-});
+// Local development server
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log("Server running on port:", PORT);
+  });
+}
+
+// Export for Vercel
+export default app;
 
 // Global error handler middleware
 app.use((err, req, res, next) => {
